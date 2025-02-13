@@ -1,0 +1,172 @@
+﻿@{
+    tbl_content content = null;
+    tbl_content_answer answer = null;
+    if (ViewData["content"] != null)
+    {
+        content = (tbl_content)ViewData["content"];
+    }
+    else
+    {
+        content = new tbl_content();
+    }
+    if (ViewData["answer"] != null)
+    {
+        answer = (tbl_content_answer)ViewData["answer"];
+    }
+    else
+    {
+        answer = new tbl_content_answer();
+    }
+
+
+
+}
+<script>
+    function previewImage() {
+        const fileInput = document.getElementById('t-btn'); // Correct file input ID
+        const imagePreview = document.getElementById('t-ans-image'); // Correct text input field ID
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileName = file.name;
+            const fileExtension = fileName.split('.').pop().toLowerCase(); // Extract file extension
+
+            // Set the file name in the text input for previewing
+            imagePreview.value = fileName;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const previewDiv = document.getElementById('imagePreview'); // For images
+                const gifPreview = document.getElementById('gifPreview'); // For GIFs
+
+                // Clear previous previews
+                previewDiv.innerHTML = '';
+                gifPreview.innerHTML = '';
+
+                if (fileExtension === 'gif') {
+                    // For GIF files
+                    gifPreview.innerHTML = `<img src="${e.target.result}" alt="Selected GIF" style="max-width: 150px; max-height: 150px;">`;
+                } else if (['jpg', 'jpeg', 'png', 'bmp', 'webp'].includes(fileExtension)) {
+                    // For other image files
+                    previewDiv.innerHTML = `<img src="${e.target.result}" alt="Selected Image" style="max-width: 100px; max-height: 100px;">`;
+                } else {
+                    // Unsupported file type
+                    previewDiv.innerHTML = `<p>Unsupported file type. Please upload an image or GIF.</p>`;
+                }
+            };
+
+            reader.readAsDataURL(file); // Read the file as a Data URL for preview
+        }
+    }
+
+    function previewFile() {
+        debugger
+        const fileInput = document.getElementById('file-upload');
+        const fileNameInput = document.getElementById('file-name');
+        const filePreview = document.getElementById('file-preview');
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileType = file.type;
+
+            // Set the file name in the text input
+            fileNameInput.value = file.name;
+
+            // Clear previous preview
+            filePreview.innerHTML = '';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Determine if the file is an image or GIF
+                if (fileType.startsWith('image/')) {
+                    filePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 150px; max-height: 150px;">`;
+                } else {
+                    filePreview.innerHTML = `<p>Unsupported file type. Please upload an image or GIF.</p>`;
+                }
+            };
+
+            reader.readAsDataURL(file); // Read file as Data URL for preview
+        } else {
+            // Clear fields if no file is selected
+            fileNameInput.value = '';
+            filePreview.innerHTML = '';
+        }
+    }
+
+
+
+
+</script>
+
+<div class="row">
+    <div class="col-md-12">
+        <div id="theme-2-header" class="form-group">
+            <input type="text" class="form-control validate[required]" value="@content.CONTENT_TITLE" placeholder="Content Title" id="t-title" name="t-title" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="theme-1-header" class="form-group">
+            <input type="text" class="form-control validate[required]" value="@content.CONTENT_HEADER" placeholder="Content Header" id="t-header" name="t-header" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <textarea class="form-control validate[required]" name="t-quetion" id="t-quetion" placeholder="Content Question" rows="6">@content.CONTENT_QUESTION</textarea>
+        </div>
+    </div>
+</div>
+<hr />
+
+<div class="row" id="Edit_hide">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="FirstName" class="control-label">Image:</label>
+            <div class="row">
+                <div class="col-md-8" style="padding-right:1px;">
+                    <input type="text" class="form-control validate[required]" readonly value="@answer.CONTENT_ANSWER_IMG1" placeholder="Choose Image" id="t-ans-image" name="t-ans-image" />
+                </div>
+                <div class="col-md-2" style="padding-left:1px;">
+                    <div class="fileUpload btn btn-primary">
+                        <span>Browse </span>
+                        <input id="t-btn" name="t-btn" class="upload" type="file" accept="image/*" onchange="select_file('t-btn', 't-ans-image'),previewImage()" />
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="display:none">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="file-upload" class="control-label">Upload Image or GIF:</label>
+            <div class="row">
+                <div class="col-md-8" style="padding-right:1px;">
+                    <input type="text" class="form-control validate[required]" readonly value="@answer.CONTENT_ANSWER_IMG1" placeholder="Choose Image" id="t-ans-image" name="t-ans-image" />
+
+                </div>
+                <div class="col-md-2" style="padding-left:1px;">
+                    <div class="fileUpload btn btn-primary">
+                        <span>Browse</span>
+                        <input id="t-btn" name="t-btn" class="upload" type="file" accept="image/*" onchange="previewFile()" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="file-preview" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <textarea class="form-control validate[required]" placeholder="Content Answer" name="t-content" id="t-content" rows="10">@answer.CONTENT_ANSWER1</textarea>
+        </div>
+    </div>
+</div>

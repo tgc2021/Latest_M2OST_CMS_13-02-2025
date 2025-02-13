@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Redirect to Login";
+    Layout = "~/Views/Shared/_cms_Layout.cshtml";
+}
+
+
+
+<h2>Redirecting to Login...</h2>
+
+<script>
+    $(document).ready(function () {
+        // Automatically make the AJAX call to the controller action
+        $.ajax({
+             url: '@Url.Action("MoodelIndex", "Moodle")',
+            
+            method: 'GET',
+            success: function (response) {
+                if (response.url) {
+                    // Open the login URL in a new tab
+                    window.open(response.url, '_blank');
+                } else if (response.error) {
+                    alert(response.error);
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the login URL.');
+            }
+        });
+    });
+</script>

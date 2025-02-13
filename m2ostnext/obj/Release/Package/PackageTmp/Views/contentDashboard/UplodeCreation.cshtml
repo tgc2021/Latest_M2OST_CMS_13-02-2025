@@ -1,0 +1,602 @@
+﻿@{
+    ViewBag.Title = "Add Content";
+    Layout = "~/Views/Shared/_cms_Layout.cshtml";
+}
+
+
+
+<link rel="stylesheet" href="~/Content/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+<script type="text/javascript" src="~/Content/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+<link rel="stylesheet" href="~/Content/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+<script type="text/javascript" src="~/Content/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script type="text/javascript">
+
+</script>
+<style>
+    #div_category {
+        margin: 3px 1px;
+    }
+
+    .data-tab {
+        padding: 2px 1px;
+        margin: 2px 1px;
+    }
+
+    .tag {
+        width: 100%;
+    }
+
+    .disp_none {
+        display: none !important;
+    }
+
+    .disp_block {
+        display: block !important;
+    }
+
+    .preview-box {
+        width: 100%;
+        height: 150px;
+        border: 1px solid #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f9f9f9;
+        overflow: hidden;
+        text-align: center;
+        font-size: 14px;
+        color: #888;
+    }
+
+        .preview-box img, .preview-box video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+</style>
+@{
+    tbl_content parentContent = (tbl_content)ViewData["parent-content"];
+    List<tbl_category> category = (List<tbl_category>)ViewData["parent-category"];
+    int j = 0;
+}
+
+@{
+    List<tbl_csst_role> roles = (List<tbl_csst_role>)ViewData["select-cscc-role"];
+}
+<script>
+    function add_category() {
+        var cid = $("#select-category").val();
+        var cText = $("#select-category option:selected").text();
+        if (cText.length > 20) cText = cText.substring(0, 20) + '..';
+
+        cText = cText + " ";
+        var i = $("#hid-category").val();
+        i++;
+        $("#hid-category").val(i);
+        var item = '<div class="data-tab col-md-2" id="div-dyn-category-' + cid + '" style="background-color: #23c6c8;"><span class="tag label label-info"><span>' + cText + '</span><input type="hidden" value="' + cid + '" id="add-con-category-' + i + '" name="add-con-category-' + i + '" /><a class="pull-right" onclick="delete_content_category(' + cid + ')"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white"></i></a></span></div>';
+        $("#div_category").append(item);
+        $("#hid-category").val(i);
+    }
+
+    function delete_content_category(i) {
+        $("#div-dyn-category-" + i + "").remove();
+    }
+    $(document).ready(function () {
+        $("#datetimepicker2").datepicker(
+            { dateFormat: "dd-mm-yy", minDate: new Date() }
+        );
+        // Event listener for checkbox change
+        $('#bulk-checkbox').change(function () {
+            debugger;
+            if ($(this).is(':checked')) {
+                // Show the bulk upload section
+                $('#bulk-upload-section').show();
+                $('#div-theme-body').hide();
+            } else {
+                // Hide the bulk upload section
+                $('#bulk-upload-section').hide();
+                $('#div-theme-body').show();
+            }
+        });
+    });
+
+
+
+
+
+
+</script>
+
+
+
+    <input type="hidden" value="@ViewData["linktype"]" name="link-parent" />
+
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="panel panel-default custom-panel">
+                <div class="panel-heading custom-panel-heading">
+                    @if (Convert.ToInt32(ViewData["LINKTYPE"]) > 0)
+                    {
+                        <div class="panel-title">Add Lead-out Content </div>
+                    }
+                    else
+                    {
+                        <div class="panel-title">Add New Content </div>
+                    }
+                </div>
+                <div class="panel-body custom-panel-body">
+
+                    <div class="row">
+                        <div class="col-md-9">
+
+
+                            @if (Convert.ToInt32(ViewData["LINKTYPE"]) > 0)
+                            {
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="col-md-2">
+                                                <label class="control-label">Link Type</label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select id="select-link-type" name="select-link-type" class="form-control">
+                                                    <option value="1">What</option>
+                                                    <option value="2">When</option>
+                                                    <option value="3">Why</option>
+                                                    <option value="4">How</option>
+                                                    <option value="5">Who</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<input type="hidden" value="@parentContent.ID_CATEGORY" name="select-category" />*@
+
+                            }
+                            else
+                            {
+                                <input type="hidden" value="0" name="select-link-type" />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="col-md-3">
+                                                <label class="control-label">Category</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select id="select-category" name="select-category" class="form-control">
+                                                    @foreach (var pro in (List<tbl_category>)ViewData["select-category"])
+                                                    {
+                                                        <option value="@pro.ID_CATEGORY">@pro.CATEGORYNAME</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input class="btn btn-default btn-primary" type="button" id="btn_categort" value="Add Category" onclick="add_category()" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-10">
+                                        <div class="form-group" id="div_category">
+                                            @if (category != null)
+                                            {
+                                                foreach (tbl_category item in category)
+                                                {
+                                                    j++;
+                                                    <div class="data-tab col-md-2 form-control" id="div-dyn-category-@item.ID_CATEGORY" style="background-color: #23c6c8;"><span class="tag label label-info"><span>@item.CATEGORYNAME</span><input type="hidden" value="@item.ID_CATEGORY" id="add-con-category-@j" name="add-con-category-@j" /><a class="pull-right" onclick="delete_content_category('@item.ID_CATEGORY')"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white"></i></a></span></div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" value="@j" id="hid-category" name="hid-category" />
+                            </div>
+                            <br />
+
+                            <div class="row">
+                                @*<div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="col-md-3">
+                                                <label class="control-label">Content Level</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select id="select-level" name="select-level" class="form-control">
+                                                    @foreach (tbl_content_level level in (List<tbl_content_level>)ViewData["select-level"])
+                                                    {
+                                                        <option value="@level.ID_CONTENT_LEVEL">@level.LEVELNAME</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-3"><label class="control-label">Expiry Date</label></div>
+                                        <div class="col-md-6">
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control validate[required]" id='datetimepicker2' name="content-expiry" />
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+
+                        <div class="col-md-12">
+                            <div>
+                                @*<input type="checkbox" id="bulk-checkbox" name="bulk-checkbox"> Bulk upload*@
+                            </div>
+                            <div id="bulk-upload-section" style="display:flex; justify-content:space-between; margin-top:5px;">
+                                <div>
+                                    <a style="background: DodgerBlue; color: white; border: none; border-radius: 5px; width: 159px; height: 28px; padding: 2px 5px;"
+                                       href="~/Content/AppUserTemplate/contentbulk.xls" download>
+                                        <i class="fa fa-download"></i> Download Template
+                                    </a>
+                                </div>
+                                <div>
+                                    <input type="file" id="csvFileInput">
+                                    <label id="csvFile" style="color: maroon; margin: 0px; display: none;">Required Excel Field</label>
+
+                                </div>
+                                <button id="activateButton" style="background: #1ab394; color: #fff; border: none; border-radius: 5px; width: 159px; height: 28px; padding: 2px 5px;">
+                                    Upload
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    @if (Convert.ToInt32(ViewData["LINKTYPE"]) > 0)
+                    {
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label class="control-label">Parent Content : @parentContent.CONTENT_QUESTION</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                    <hr />
+
+
+
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="div-theme-body"></div>
+
+                        </div>
+                    </div>
+                    <hr />
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="div-dynam-step">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    @*$('#activateButton').click(function (e) {
+        debugger;
+        e.preventDefault();
+
+        if (!validateSelection()) {
+            return; // Stop execution if validation fails
+        }
+
+        var expiryDate = $("#datetimepicker2").val();
+        var selectedCategory = $("#select-category").val();
+        var file = $('#csvFileInput').prop('files')[0];
+
+        // Validate file selection
+        if (!file) {
+            showError('Please select an Excel file.');
+            return;
+        }
+
+        var fileName = file.name;
+        var fileExtension = fileName.split('.').pop().toLowerCase();
+
+        if (fileExtension !== 'xls' && fileExtension !== 'xlsx') {
+            showError('Please select a valid .xlsx file.');
+            $('#csvFileInput').val(''); // Clear invalid file
+            return;
+        }
+
+        $('#csvFile').hide(); // Hide any error message if present
+
+        // Process the Excel file
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+                var sheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[sheetName];
+                var jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                // Validate and process data
+                var invalidRows = [];
+                var processedData = jsonData.map(function (row, index) {
+                    var Theme = row['Theme'];
+                    var contentTitle = row['Content Title'];
+                    var contentHeader = row['Content Header'];
+                    var contentQuestion = row['Content Question'];
+                    var contentAnswer = row['Content Answer'];
+                    var metadata = row['Meatdata']; // Use the correct key from JSON
+
+                    // Validate each row
+                    if (!Theme || !contentTitle || !contentHeader || !contentQuestion || !contentAnswer || !metadata) {
+                        invalidRows.push({
+                            row: index + 1,
+                            missingFields: {
+                                'Theme': !Theme,
+                                'Content Title': !contentTitle,
+                                'Content Header': !contentHeader,
+                                'Content Question': !contentQuestion,
+                                'Content Answer': !contentAnswer,
+                                'Meatdata': !metadata // Update to correct key
+                            }
+                        });
+                    }
+
+                    return {
+                        Theme: Theme,
+                        contentTitle: contentTitle,
+                        contentHeader: contentHeader,
+                        contentQuestion: contentQuestion,
+                        contentAnswer: contentAnswer,
+                        metadata: metadata
+                    };
+                });
+
+                // Handle invalid rows
+                if (invalidRows.length > 0) {
+                    var message = "The following rows have missing fields:\n";
+                    invalidRows.forEach(function (row) {
+                        message += "Row " + row.row + " is missing: " + Object.keys(row.missingFields)
+                            .filter(key => row.missingFields[key])
+                            .join(", ") + ".\n";
+                    });
+                    alert(message);
+                    return;
+                }
+
+                sendDataToController(processedData);
+            } catch (error) {
+                console.error("Error processing file: ", error);
+                alert("An error occurred while processing the file. Please check the file format and try again.");
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+
+    function sendDataToController(dataArray) {
+        debugger;
+        $.ajax({
+            url: '@Url.Action("UplodeContent", "ContentDashboard")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                data: dataArray,
+                linkParent: $('#link-parent').val(), // Value from input field
+                contentExpiry: $('#datetimepicker2').val(), // Value from date picker
+                selectedCategory: $("#select-category").val(),
+                hidcategory : $("#hid-category").val()
+            }),
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error: ", error, "Status: ", status, "Response: ", xhr.responseText);
+                alert("An error occurred while processing your request. Please try again.");
+            }
+        });
+    }*@
+
+$('#activateButton').click(function (e) {
+    e.preventDefault();
+    debugger;
+    if (!validateSelection()) {
+        return; // Stop execution if validation fails
+    }
+
+    var expiryDate = $("#datetimepicker2").val();
+    var selectedCategory = $("#select-category").val();
+    var file = $('#csvFileInput').prop('files')[0];
+
+    // Validate file selection
+    if (!file) {
+        showError('Please select an Excel file.');
+        return;
+    }
+
+    var fileName = file.name;
+    var fileExtension = fileName.split('.').pop().toLowerCase();
+
+    if (fileExtension !== 'xls' && fileExtension !== 'xlsx') {
+        showError('Please select a valid .xlsx file.');
+        $('#csvFileInput').val(''); // Clear invalid file
+        return;
+    }
+
+    $('#csvFile').hide(); // Hide any error message if present
+
+    // Process the Excel file
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            var data = new Uint8Array(e.target.result);
+            var workbook = XLSX.read(data, { type: 'array' });
+            var sheetName = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[sheetName];
+            var jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            // Validate and process data
+            var invalidRows = [];
+            var processedData = jsonData.map(function (row, index) {
+                var Theme = row['Theme'];
+                var contentTitle = row['Content Title'];
+                var contentHeader = row['Content Header'];
+                var contentQuestion = row['Content Question'];
+                var contentAnswer = row['Content Answer'];
+                var metadata = row['Meatdata']; // Use the correct key from JSON
+
+                // Validate each row
+                if (!Theme || !contentTitle || !contentHeader || !contentQuestion || !contentAnswer || !metadata) {
+                    invalidRows.push({
+                        row: index + 1,
+                        missingFields: {
+                            'Theme': !Theme,
+                            'Content Title': !contentTitle,
+                            'Content Header': !contentHeader,
+                            'Content Question': !contentQuestion,
+                            'Content Answer': !contentAnswer,
+                            'Metadata': !metadata // Update to correct key
+                        }
+                    });
+                }
+
+                return {
+                    Theme: Theme,
+                    contentTitle: contentTitle,
+                    contentHeader: contentHeader,
+                    contentQuestion: contentQuestion,
+                    contentAnswer: contentAnswer,
+                    metadata: metadata
+                };
+            });
+
+            // Handle invalid rows
+            if (invalidRows.length > 0) {
+                var message = "The following rows have missing fields:\n";
+                invalidRows.forEach(function (row) {
+                    message += "Row " + row.row + " is missing: " + Object.keys(row.missingFields)
+                        .filter(key => row.missingFields[key])
+                        .join(", ") + ".\n";
+                });
+                alert(message);
+                return;
+            }
+
+            // Process data in chunks
+            sendDataInChunks(processedData, 50);
+        } catch (error) {
+            console.error("Error processing file: ", error);
+            alert("An error occurred while processing the file. Please check the file format and try again.");
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+
+// Function to send data in chunks of specified size
+function sendDataInChunks(dataArray, chunkSize) {
+    let totalChunks = Math.ceil(dataArray.length / chunkSize); // Calculate total number of chunks
+    let currentChunk = 0;
+
+    function processNextChunk() {
+        if (currentChunk >= totalChunks) {
+            alert("All data has been successfully processed.");
+            return;
+        }
+
+        // Extract the current chunk
+        let chunk = dataArray.slice(currentChunk * chunkSize, (currentChunk + 1) * chunkSize);
+
+        // Send the chunk to the server
+        $.ajax({
+            url: '@Url.Action("UplodeContent", "ContentDashboard")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                data: chunk,
+                linkParent: $('#link-parent').val(),
+                contentExpiry: $('#datetimepicker2').val(),
+                selectedCategory: $("#select-category").val(),
+                hidcategory: $("#hid-category").val()
+            }),
+            success: function (response) {
+                if (response.success) {
+                    console.log(`Chunk ${currentChunk + 1}/${totalChunks} processed successfully.`);
+                    currentChunk++;
+                    processNextChunk(); // Process the next chunk
+                } else {
+                    console.error(`Error processing chunk ${currentChunk + 1}:`, response.message);
+                    alert(`Error processing chunk ${currentChunk + 1}: ${response.message}`);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(`AJAX error for chunk ${currentChunk + 1}:`, error, "Status:", status, "Response:", xhr.responseText);
+                alert(`An error occurred while processing chunk ${currentChunk + 1}. Please try again.`);
+            }
+        });
+    }
+
+    processNextChunk(); // Start processing the chunks
+}
+    function validateSelection() {
+        var expiryDate = $("#datetimepicker2").val();
+
+        if (!expiryDate) {
+            alert("Please select an expiry date.");
+            return false;
+        }
+
+        return true;
+    }
+
+    function showError(message) {
+        $('#csvFile').show().text(message);
+    }
+    </script>
+

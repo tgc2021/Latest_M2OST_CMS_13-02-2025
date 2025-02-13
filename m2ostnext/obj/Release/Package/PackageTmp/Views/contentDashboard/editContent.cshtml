@@ -1,0 +1,830 @@
+﻿@{
+    ViewBag.Title = "Edit Content";
+    Layout = "~/Views/Shared/_cms_Layout.cshtml";
+  
+        }
+        @*<link href="~/Content/dist/summernote.css" rel="stylesheet" />*@
+        <link href="~/Content/RichText/dist/summernote.css" rel="stylesheet" />
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+        <!----------------------------------CSS/Script------------------------------------------>
+        @*<script src="~/Content/dist/summernote.js"></script>*@
+        <script src="~/Content/RichText/dist/summernote.js"></script>
+
+
+        @{
+            db_m2ostEntities db = new db_m2ostEntities();
+            tbl_content content = (tbl_content)ViewData["CONTENT"];
+            tbl_content_answer answer = (tbl_content_answer)ViewData["ANSWER"];
+            List<tbl_content_answer_steps> steps = (List<tbl_content_answer_steps>)ViewData["STEPS"];
+            List<tbl_content_metadata> metadata = (List<tbl_content_metadata>)ViewData["METADATA"];
+            List<string> str = new List<string>();
+            foreach (tbl_content_metadata m in metadata)
+            {
+                str.Add(m.CONTENT_METADATA);
+            }
+            string metastring = String.Join(",", str);
+            int step_count = steps.Count;
+            int metacount = metadata.Count;
+            int theme = content.ID_THEME;
+            List<tbl_content_organization_mapping> mapping = (List<tbl_content_organization_mapping>)ViewData["mapping"];
+            string imgurl = "https://www.m2ost.in/M2OST_NewDev_CMS/Content/SKILLMUNI_DATA/";
+        
+        }
+<style>
+    .preview-box {
+        width: 100%;
+        height: 150px;
+        border: 1px solid #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f9f9f9;
+        overflow: hidden;
+        text-align: center;
+        font-size: 14px;
+        color: #888;
+    }
+
+        .preview-box img, .preview-box video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+</style>
+<script>
+
+            $(document).ready(function () {
+                $('.summernote').summernote();
+                if (@content.ID_THEME == 2) {
+                    document.getElementById('_option2_Image_uplode').style.display = 'none';
+                }
+                else if (@content.ID_THEME == 1) {
+                    document.getElementById('_option2_Image_uplode').style.display = 'block';
+                }
+            });
+
+</script>
+        <script>
+            $(function () {
+                $("#form-add-content").validationEngine();
+                changetheme();
+                @{
+     int sc = 0;
+         }
+
+                var scount=@(steps.Count);
+                @if(steps.Count>0)
+        {
+            int i=0;
+            foreach (tbl_content_answer_steps stp in steps)
+            {
+
+                i++;
+         <text>
+
+                LoadSteps(@stp.STEPNO,@stp.ID_THEME,"ContentView",@stp.ID_ANSWER_STEP);
+
+                </text>
+
+         }
+          <text>$("#step-count").val(@i);</text>
+         }
+            });
+
+            function change_typevideo()
+            {
+       
+                var vale = $("#change_URL").val();
+      
+
+                if (vale == 1)
+                {
+                    $("#append_url").hide();
+                    $("#append_video").show();
+                    $("#append_video_type").html("");
+                    $("#append_video_type").append("<input type='hidden' value='1' name='video_type' />");
+            
+                }
+                else
+                {
+                    $("#append_url").show();
+                    $("#append_video").hide();
+                    $("#append_video_type").html("");
+                    $("#append_video_type").append("<input type='hidden' value='2' name='video_type' />");
+
+                }
+            }
+            $(function () { $("#datetimepicker2").datepicker(
+       { dateFormat: "dd-mm-yy", minDate: new Date() }
+    );});
+            function select_file(btn, imgf,ban)
+            {
+                var file = $("#" + btn + "")[0].files[0];
+                var filename = "";
+                if (file) {
+                    filename = file.name;
+                    $("#" + ban + "").addClass("validate[required,custom[url]]");
+                } else {
+                    $("#" + ban + "").removeClass("validate[required,custom[url]]");
+                }
+
+                $("#" + imgf + "").val(filename);
+            }
+
+
+            function changetheme() {
+                var act = "theme@(theme)";
+                var cntrl = "ContentView";
+
+                var link = '@Url.Action("action", "control", new { id="-1"})';
+                link = link.replace("action", act);
+                link = link.replace("control", cntrl);
+                link = link.replace("-1", @(content.ID_CONTENT));
+
+
+                $("#loading-gif").show();
+                $("#div-theme-body").hide();
+                $.get(link, null, function (data) {
+                    $("#div-theme-body").show();
+                    $("#div-theme-body").empty().append(data);
+                    $("#loading-gif").hide();
+                });
+
+            }
+
+            function changethemestep(val, id) {
+
+                var act = "themestep" + val + "";
+                var cntrl = "ContentView";
+                var count = $("#step-count").val();
+                var link = '@Url.Action("action", "control",new {id="-id",vid="-vid"})';
+                link = link.replace("action", act);
+                link = link.replace("control", cntrl);
+                link = link.replace("-id", id);
+                link = link.replace("-vid", 0);
+                $.get(link, null, function (data) {
+                    $("#content-step-" + id).empty().append(data);
+                });
+
+            }
+
+            function LoadSteps(stepid,val,cntrl,vid)
+            {
+              
+                var act = "themestep" + val + "";
+                var link = '@Url.Action("action", "control",new {id="-id",vid="-vid"})';
+                link = link.replace("action", act);
+                link = link.replace("control", cntrl);
+                link = link.replace("-id", stepid);
+                link = link.replace("-vid", vid);
+                var step = stepid;
+                
+
+            
+                $.ajax({
+                    url : link,
+                    type : "get",
+                    success : function(data) {
+                  
+                   
+                        var option='<div class="row"><div class="col-md-12"> <div class="form-group"><div class="col-md-7"><h4 style="color:#000000;"><lable class="control-label">Answer Step No : '+stepid+'</lable></h4></div><div class="col-md-4"><select id="select-theme-step-' + stepid + '" name="select-theme-step-' + stepid + '" class="form-control" onchange="changethemestep(this.value,' + stepid + ')"><option value="8">THEME 1</option><option value="9">THEME 2</option><option value="10">THEME 3</option><option value="11">THEME 4</option><option value="12">THEME 5</option><option value="13">THEME 6</option><option value="14">THEME 7</option><option value="15">THEME 8</option><option value="16">THEME 9</option><option value="17">THEME 10</option><option value="18">THEME 11</option><option value="19">THEME 12</option>';
+                        option = option + '<option value="20">THEME 13</option>';
+                        option = option + '<option value="21">THEME 14</option>';
+                        option = option + '<option value="22">THEME 15</option>';
+                        option = option + '<option value="23">THEME 16</option>';
+                        option = option + '<option value="24">THEME 17</option>';
+                        option = option + '<option value="25">THEME 18</option>';
+                        option = option + '<option value="26">THEME 19</option>';//theme for youtube url and text
+
+                        option = option + '</select> </div></div></div></div><div id="content-step-' + stepid + '"></div>';
+                  
+                   
+                        $("#div-dynam-step").append(option);
+                        $("#content-step-" + stepid).empty().append(data);
+                        $("#select-theme-step-"+stepid).val(val);
+                    }
+                });
+            }
+
+
+            function dynam_step_add(val) {
+              
+                var option = "";
+                var step = $("#step-count").val();
+            
+                step++;
+                option = '<div class="row"><div class="col-md-12"> <div class="form-group"><div class="col-md-7"><h4 style="color:#000000;"><lable class="control-label">Answer Step No : '+step+'</lable></h4></div><div class="col-md-4"><select id="select-theme-step-' + step + '" name="select-theme-step-' + step + '" class="form-control" onchange="changethemestep(this.value,' + step + ')"><option value="8">THEME 1</option><option value="9">THEME 2</option><option value="10">THEME 3</option><option value="11">THEME 4</option><option value="12">THEME 5</option><option value="13">THEME 6</option><option value="14">THEME 7</option><option value="15">THEME 8</option><option value="16">THEME 9</option><option value="17">THEME 10</option><option value="18">THEME 11</option><option value="19">THEME 12</option>';
+                option = option + '<option value="20">THEME 13</option>';
+                option = option + '<option value="21">THEME 14</option>';
+                option = option + '<option value="22">THEME 15</option>';
+                option = option + '<option value="23">THEME 16</option>';
+                option = option + '<option value="24">THEME 17</option>';
+                option = option + '<option value="25">THEME 18</option>';
+                option = option + '<option value="26">THEME 19</option>';//theme for youtube url and text
+
+                option = option + '</select> </div></div></div></div><div id="content-step-' + step + '"></div>';
+                $("#step-count").val(step);
+                $("#div-dynam-step").append(option);
+                changethemestep(8, step);
+            }
+            function add_category() {
+                var cid = $("#select-category").val();
+                var cText = $("#select-category option:selected").text();
+                if (cText.length > 20) cText = cText.substring(0, 25) + '..';
+
+                cText = cText + " ";
+                var i = $("#hid-category").val();
+                i++;
+                $("#hid-category").val(i);
+                var item = '<div class="data-tab col-md-2" id="div-dyn-category-' + i + '" style="background-color: #23c6c8;"><span class="tag label label-info"><span>' + cText + '</span><input type="hidden" value="' + cid + '" id="add-con-category-' + i + '" name="add-con-category-' + i + '" /><a class="pull-right" onclick="delete_content_category(' + i + ',0)"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white"></i></a></span></div>';
+                $("#div_category").append(item);
+                $("#hid-category").val(i);
+            }
+            function delete_content_category(i,cid) {
+                $("#div-dyn-category-" + i + "").remove();
+
+                var link = '@Url.Action("removeCategoryLink", "contentDashboard", new { id = "-id",cnid="-2" })';
+                link = link.replace("-id", i);
+                link = link.replace("-2",cid);
+                $.ajax({
+                    url : link,
+                    type : "get",
+
+                    success : function(data) {
+
+                    }
+                });
+            }
+
+
+        </script>
+        <style>
+            #div_category {
+                margin: 3px 1px;
+            }
+
+            .data-tab {
+                padding: 2px 1px;
+                margin: 2px 1px;
+            }
+
+            .tag {
+                width: 100%;
+            }
+
+            .pull-right {
+                float: none;
+                vertical-align: central;
+            }
+
+            .glyphicon {
+                color: #ffffff;
+            }
+        </style>
+
+        @using (Html.BeginForm("updateContent", "contentDashboard", FormMethod.Post, new { id = "form-add-content", enctype = "multipart/form-data" }))
+        {
+            <input type="hidden" name="content-id" value="@content.ID_CONTENT" />
+            <div id="pagecontent_dashboard">
+                <div class="panel panel-default custom-panel">
+                    <div class="panel-heading custom-panel-heading clearfix">
+                        <div class="panel-title">Edit Content </div>
+                    </div>
+                    <div class="panel-body custom-panel-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4" id="loading-gif" style="display:none;color:#000000;">
+                                        <img src="~/Content/images/loading.gif" />
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-2">
+                                        <label class="control-label">Category</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select id="select-category" name="select-category" class="form-control">
+                                            @foreach (var pro in (List<tbl_category>)ViewData["select-category"])
+                                            {
+                                                <option value="@pro.ID_CATEGORY">@pro.CATEGORYNAME</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input class="btn btn-default btn-info" id="btn_categort" value="Add Category" onclick="add_category()" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10">
+                                    <div class="form-group" id="div_category">
+                                        @{
+                                            int i = 1;
+                                        }
+                                        @foreach (tbl_content_organization_mapping item in mapping)
+                                        {
+                                            tbl_category tCat = db.tbl_category.Where(t => t.ID_CATEGORY == item.id_category).FirstOrDefault();
+                                            if (tCat != null)
+                                            {
+
+                                                <div class="data-tab col-md-2" id="div-dyn-category-@item.id_category" style="background-color: #23c6c8;">
+                                                    <span class="tag label label-info">
+                                                        <span>
+                                                            @if (tCat.CATEGORYNAME.Length > 21)
+                                                            {
+                                                                @(tCat.CATEGORYNAME.Substring(0, 20) + "..")
+                                                            }
+                                                            else
+                                                            {
+                                                                @(tCat.CATEGORYNAME)
+                                                            }
+                                                        </span><input type="hidden" value="@item.id_category" id="add-con-category-@i" name="add-con-category-@i" />
+                                                        <a class="pull-right" onclick="delete_content_category('@item.id_category','@item.id_content')"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white "></i></a>
+                                                    </span>
+                                                </div>
+                                                i++;
+                                            }
+
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" value="@i" id="hid-category" name="hid-category" />
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-2">
+                                        <label class="control-label">Content Level</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select id="select-level" name="select-level" class="form-control">
+                                            @foreach (var pro in (List<tbl_content_level>)ViewData["select-level"])
+                                            {
+                                                if (content.ID_CONTENT_LEVEL == pro.ID_CONTENT_LEVEL)
+                                                {
+                                                    <option value="@pro.ID_CONTENT_LEVEL" selected>@pro.LEVELNAME</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@pro.ID_CONTENT_LEVEL">@pro.LEVELNAME</option>
+                                                }
+
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-2"><label class="control-label">Expiry Date</label></div>
+                                    <div class="col-md-4">
+                                        <div class='input-group date'>
+                                            <input type='text' class="form-control validate[required]" id='datetimepicker2' name="content-expiry" value="@content.EXPIRY_DATE.Value.ToString("dd-MM-yyyy")" />
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+                        @*////////*@
+                        <!-- Upload Options -->
+                    <div class="col-md-6 my-3" Id=_option2_Image_uplode>
+                        <div class="row">
+
+                            <!-- Image Preview -->
+                            <div class="col-md-6 my-3">
+                                @if (!string.IsNullOrEmpty(answer.CONTENT_ANSWER_IMG1) &&
+                                (answer.CONTENT_ANSWER_IMG1.IndexOf(".jpg", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                answer.CONTENT_ANSWER_IMG1.IndexOf(".jpeg", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                answer.CONTENT_ANSWER_IMG1.IndexOf(".png", StringComparison.OrdinalIgnoreCase) >= 0))
+
+                                {
+                                    string imagefile = imgurl + content.CONTENT_OWNER + "/" + content.ID_CONTENT + "/" + answer.CONTENT_ANSWER_IMG1;
+
+
+                                    <div id="imagePreview_1" class="preview-box mb-3">
+                                        <img src="@imagefile" alt="Preview Image" class="img-fluid rounded">
+                                    </div>
+                                }
+
+                                else if (!string.IsNullOrEmpty(answer.CONTENT_ANSWER_IMG1) &&
+                                (answer.CONTENT_ANSWER_IMG1.IndexOf(".mp4", StringComparison.OrdinalIgnoreCase) >= 0))
+                                {
+                                    string imagefile = imgurl + content.CONTENT_OWNER + "/" + content.ID_CONTENT + "/" + answer.CONTENT_ANSWER_IMG1;
+
+                                    <div id="imagePreview_1" class="preview-box mb-3">
+                                        <video id="videoPreview_1" class="mb-3" style="max-width: 100%; display: block;" controls>
+                                            <source src="@imagefile" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                }
+                                else if (!string.IsNullOrEmpty(answer.CONTENT_ANSWER_IMG1) &&
+                                (answer.CONTENT_ANSWER_IMG1.IndexOf("https://", StringComparison.OrdinalIgnoreCase) >= 0))
+                                {
+                                    <input type="text" class="form-control" id="YoutubeUrl_1" name="YoutubeUrl" value="@answer.CONTENT_ANSWER_IMG1">
+                                }
+                                else if (!string.IsNullOrEmpty(answer.CONTENT_ANSWER_IMG1) &&
+                                (answer.CONTENT_ANSWER_IMG1.IndexOf(".gif", StringComparison.OrdinalIgnoreCase) >= 0))
+                                {
+                                    string imagefile = imgurl + content.CONTENT_OWNER + "/" + content.ID_CONTENT + "/" + answer.CONTENT_ANSWER_IMG1;
+
+
+                            <div id="imagePreview_1" class="preview-box mb-3">
+                                <img id="gifPreview" src="@imagefile" alt="GIF Preview" style="max-width: 100%; height: auto;" />
+                            </div>
+                                }
+
+
+                                <!-- YouTube URL Input -->
+                                <!--<div class="col-md-6 my-3">
+        <input type="text" class="form-control" id="YoutubeUrl" name="YoutubeUrl" placeholder="Enter YouTube URL">
+    </div>-->
+                                <!-- GIF Preview -->
+                                <!--<div class="col-md-6 my-3">
+        <div id="gifPreview_1" class="preview-box mb-3"></div>
+        <div class="custom-file-upload">
+            <input type="file" id="Gif_path" name="Gif_path" class="file-input" accept="image/gif" onchange="previewGif()">
+            <label class="file-label" for="Gif_path">Browse GIF</label>
+        </div>
+    </div>-->
+                                @*</div>*@
+                            </div>
+
+                                </div>
+      
+                        <div><label class="control-label">Upload File</label></div>
+                        <div class="row">
+                            <div class="col-md-6" id="_option2_Image">
+                                <input type="radio" name="select-theme-level" value="image" id="_option2" onclick="showUploadOption('image')"> Upload Image
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" name="select-theme-level" value="video" id="_option3" onclick="showUploadOption('video')"> Upload Video
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input type="radio" name="select-theme-level" value="url" id="_option4" onclick="showUploadOption('youtube')"> YouTube URL
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" name="select-theme-level" value="gif" id="_option5" onclick="showUploadOption('gif')"> Upload GIF
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <input type="radio" name="select-theme-level" value="text" id="_option6" onclick="showUploadOption('text')"> Enter Text
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Image Input -->
+                        <div class="col-md-6 my-3" id="bgImg" style="display: none;">
+                            <div id="imagePreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Image_path" name="Image_path" class="file-input" accept="image/*" onchange="previewImage()">
+                                <label class="file-label" for="Image_path">Browse Image</label>
+                            </div>
+                        </div>
+
+                        <!-- YouTube URL Input -->
+                        <div class="col-md-6 my-3" id="bgyoutube" style="display: none;">
+                            <input type="text" class="form-control" id="YoutubeUrl"  name="YoutubeUrl" placeholder="Enter YouTube URL">
+                        </div>
+
+                        <!-- Video Input -->
+                        <div class="col-md-6 my-3" id="bgvideourl" style="display: none;">
+                            <div id="videoPreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Video_path" name="Video_path" class="file-input" accept="video/*" onchange="previewVideo()">
+                                <label class="file-label" for="Video_path">Browse Video</label>
+                            </div>
+                        </div>
+
+                        <!-- GIF Input -->
+                        <div class="col-md-6 my-3" id="bgGif" style="display: none;">
+                            <div id="gifPreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Gif_path" name="Gif_path" class="file-input" accept="image/gif" onchange="previewGif()">
+                                <label class="file-label" for="Gif_path">Browse GIF</label>
+                            </div>
+                        </div>
+
+
+                        <!-- Image Input -->
+                        <div class="col-md-6 my-3" id="bgImg" style="display: none;">
+                            <div id="imagePreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Image_path" class="file-input" accept="image/*" onchange="previewImage()">
+                                <label class="file-label" for="Image_path">Preview Image</label>
+                            </div>
+                        </div>
+
+
+
+                        <!-- YouTube URL Input -->
+                        <div class="col-md-6 my-3" id="bgyoutube" style="display: none;">
+                            <input type="text" class="form-control" id="YoutubeUrl" placeholder="Enter YouTube URL">
+                        </div>
+
+                        <!-- Video Input -->
+                        <div class="col-md-6 my-3" id="bgvideourl" style="display: none;">
+                            <div id="videoPreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Video_path" class="file-input" accept="video/*" onchange="previewVideo()">
+                                <label class="file-label" for="Video_path">Preview Video</label>
+                            </div>
+                        </div>
+
+                        <!-- GIF Input -->
+                        <div class="col-md-6 my-3" id="bgGif" style="display: none;">
+                            <div id="gifPreview" class="preview-box mb-3"></div>
+                            <div class="custom-file-upload">
+                                <input type="file" id="Gif_path" class="file-input" accept="image/gif" onchange="previewGif()">
+                                <label class="file-label" for="Gif_path">Preview GIF</label>
+                            </div>
+                        </div>
+
+                        <script>
+                            function showUploadOption(option) {
+                                debugger;
+
+                                // Hide all upload sections
+                                document.getElementById('_option2_Image_uplode').style.display = 'none';
+                                document.getElementById('bgImg').style.display = 'none';
+                                document.getElementById('bgyoutube').style.display = 'none';
+                                document.getElementById('bgvideourl').style.display = 'none';
+                                document.getElementById('bgGif').style.display = 'none';
+
+
+                                // Clear previews
+                                document.getElementById('imagePreview').innerHTML = '';
+                                document.getElementById('videoPreview').innerHTML = '';
+                                document.getElementById('gifPreview').innerHTML = '';
+                                
+
+                                // Show the selected upload section
+                                if (option === 'image') {
+                                    debugger;
+                                   
+                                    document.getElementById('bgImg').style.display = 'block';
+                                   // document.getElementById('Edit_hide').style.display = 'none';
+                                } else if (option === 'youtube') {
+                                    document.getElementById('bgyoutube').style.display = 'block';
+                                   // document.getElementById('Edit_hide').style.display = 'none';
+                                } else if (option === 'video') {
+                                    document.getElementById('bgvideourl').style.display = 'block';
+                                  //  document.getElementById('Edit_hide').style.display = 'none';
+                                } else if (option === 'gif') {
+                                    document.getElementById('bgGif').style.display = 'block';
+                                   // document.getElementById('Edit_hide').style.display = 'none';
+                                }
+                                else if (option === 'text') {
+                                    document.getElementById('bgImg').style.display = 'none';
+                                    document.getElementById('bgyoutube').style.display = 'none';
+                                    document.getElementById('bgvideourl').style.display = 'none';
+                                    document.getElementById('bgGif').style.display = 'none';
+                                  //  document.getElementById('Edit_hide').style.display = 'none';
+                                   
+                                }
+
+
+                            }
+
+                            //function previewImage() {
+                            //    debugger;
+                            //    const fileInput = document.getElementById('Image_path');
+                            //    const imagePreview = document.getElementById('imagePreview');
+                            //    if (fileInput.files && fileInput.files[0]) {
+                            //        const reader = new FileReader();
+                            //        reader.onload = function (e) {
+                            //            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Selected Image" style="max-width: 100px; max-height: 100px;">`;
+                            //        };
+                            //        reader.readAsDataURL(fileInput.files[0]);
+                            //    }
+                            //}
+                            function previewImage() {
+                                const fileInput = document.getElementById('Image_path');
+                                const imagePreview = document.getElementById('imagePreview');
+
+                                if (fileInput.files && fileInput.files[0]) {
+                                    const file = fileInput.files[0];
+
+                                    // Check file size (1 MB = 1,048,576 bytes)
+                                    if (file.size > 1048576) {
+                                        alert("The selected file is too large. Please upload an image smaller than 1 MB.");
+                                        fileInput.value = ""; // Clear the input
+                                        imagePreview.innerHTML = ""; // Clear the preview
+                                        return;
+                                    }
+
+                                    const reader = new FileReader();
+                                    reader.onload = function (e) {
+                                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Selected Image" style="max-width: 100px; max-height: 100px;">`;
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    imagePreview.innerHTML = ""; // Clear preview if no file is selected
+                                }
+                            }
+
+                            //function previewVideo() {
+                            //    const fileInput = document.getElementById('Video_path');
+                            //    const videoPreview = document.getElementById('videoPreview');
+                            //    if (fileInput.files && fileInput.files[0]) {
+                            //        const reader = new FileReader();
+                            //        reader.onload = function (e) {
+                            //            videoPreview.innerHTML = `<video controls style="max-width: 200px; max-height: 150px;">
+                            //                                                                                                                                                      <source src="${e.target.result}" type="${fileInput.files[0].type}">
+                            //                                                                                                                                                      Your browser does not support the video tag.
+                            //                                                                                                                                                  </video>`;
+                            //        };
+                            //        reader.readAsDataURL(fileInput.files[0]);
+                            //    }
+                            //}
+                            function previewVideo() {
+                                const fileInput = document.getElementById('Video_path');
+                                const videoPreview = document.getElementById('videoPreview');
+
+                                if (fileInput.files && fileInput.files[0]) {
+                                    const file = fileInput.files[0];
+
+                                    // Check file size (2 MB = 2,097,152 bytes)
+                                    if (file.size > 2097152) {
+                                        alert("The selected file is too large. Please upload a video smaller than 2 MB.");
+                                        fileInput.value = ""; // Clear the input
+                                        videoPreview.innerHTML = ""; // Clear the preview
+                                        return;
+                                    }
+
+                                    const reader = new FileReader();
+                                    reader.onload = function (e) {
+                                        videoPreview.innerHTML = `
+<video controls style="max-width: 200px; max-height: 150px;">
+    <source src="${e.target.result}" type="${file.type}">
+    Your browser does not support the video tag.
+</video>`;
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    videoPreview.innerHTML = ""; // Clear preview if no file is selected
+                                }
+                            }
+
+                            //function previewGif() {
+                            //    debugger;
+                            //    const fileInput = document.getElementById('Gif_path');
+                            //    const gifPreview = document.getElementById('gifPreview');
+                            //    if (fileInput.files && fileInput.files[0]) {
+                            //        const reader = new FileReader();
+                            //        reader.onload = function (e) {
+                            //            gifPreview.innerHTML = `<img src="${e.target.result}" alt="Selected GIF" style="max-width: 100px; max-height: 100px;">`;
+                            //        };
+                            //        reader.readAsDataURL(fileInput.files[0]);
+                            //    }
+                            //}
+
+                            function previewGif() {
+                                const fileInput = document.getElementById('Gif_path');
+                                const gifPreview = document.getElementById('gifPreview');
+
+                                if (fileInput.files && fileInput.files[0]) {
+                                    const file = fileInput.files[0];
+
+                                    // Check file size (1 MB = 1,048,576 bytes)
+                                    if (file.size > 1048576) {
+                                        alert("The selected file is too large. Please upload a GIF smaller than 1 MB.");
+                                        fileInput.value = ""; // Clear the input
+                                        gifPreview.innerHTML = ""; // Clear the preview
+                                        return;
+                                    }
+
+                                    const reader = new FileReader();
+                                    reader.onload = function (e) {
+                                        gifPreview.innerHTML = `
+<img src="${e.target.result}" alt="Selected GIF" style="max-width: 100px; max-height: 100px;">`;
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    gifPreview.innerHTML = ""; // Clear preview if no file is selected
+                                }
+                            }
+                        </script>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="div-theme-body"></div>
+
+                            </div>
+                        </div>
+
+
+
+                        <hr />
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="div-dynam-step">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-10">
+
+                                    </div>
+                                    <div class="col-md-1">
+                                        <input type="hidden" value="@step_count" name="current_step_count" />
+                                        <input type="hidden" value="@step_count" id="step-count" name="step-count" />
+                                        <input id="t-1-btn-steps" type="button" class="btn btn-default btn-info" value="Add More Steps" onclick="dynam_step_add()" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div id="theme-1-meta">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" value="@metastring" placeholder="Enter Metadata Comma Separated...." id="t-metadata" name="t-metadata" />
+                                        @*<input type="text" class="form-control validate[required]" value="@metastring" placeholder="Enter Metadata Comma Separated...." id="t-metadata" name="t-metadata" />*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-5">
+
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input id="btn_question2" type="submit" class="btn btn-default btn-info" name="btn_submit" value="Save and Exit" />
+                                    </div>
+                                    <div class="col-md-4">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                                            }
+@*<script>
+     function changetheme(val) {
+     debugger;
+    
+     var act = "theme" + val + "";
+     var cntrl = "ContentView";
+
+     $("#tPreview").attr("href", "http://103.7.64.68/m2ostbeta/Content/Theme/t" + val + ".jpg");
+     $("#preview-anchor").attr("href", "http://103.7.64.68/m2ostbeta/Content/Theme/t" + val + ".jpg");
+     $("#preview-div").attr("src", "http://103.7.64.68/m2ostbeta/Content/Theme/t" + val + ".jpg");
+
+     var link = '@Url.Action("action", "control", new { id="-1"})';
+     link = link.replace("action", act);
+     link = link.replace("control", cntrl);
+     link = link.replace("-1", 0);
+
+     //$("#loading-gif").show();
+     $("#div-theme-body").hide();
+     $.get(link, null, function (data) {
+         debugger;
+         $("#div-theme-body").show();
+         $("#div-theme-body").empty().append(data);
+         //$("#loading-gif").hide();
+$("#loading-gif").removeClass('disp_block');
+$("#loading-gif").addClass('disp_none');
+     });
+
+ }
+</script>*@
+
+
