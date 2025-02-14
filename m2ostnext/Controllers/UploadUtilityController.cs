@@ -54,480 +54,487 @@ namespace m2ostnext.Controllers
             return (ActionResult)this.View();
         }
 
-        public ActionResult UserUploadDisplay()
-        {
-            List<UserUploadClass> userUploadClassList = new List<UserUploadClass>();
-            List<UserUploadClass> source = new List<UserUploadClass>();
-            UserSession content = (UserSession)this.HttpContext.Session.Contents["UserSession"];
-            int orgid = Convert.ToInt32(content.id_ORGANIZATION);
-            string upKey = "UP_" + content.id_ORGANIZATION + "_" + content.ID_USER;
-            if (this.Request != null)
-            {
-                HttpPostedFileBase file = this.Request.Files["uploadBtn"];
-                if (file != null)
-                {
-                    if (file.ContentLength >= 0 || !string.IsNullOrEmpty(file.FileName))
-                    {
-                        string fileName = file.FileName;
-                        string contentType = file.ContentType;
-                        byte[] buffer = new byte[file.ContentLength];
-                        file.InputStream.Read(buffer, 0, Convert.ToInt32(file.ContentLength));
-                        using (ExcelPackage excelPackage = new ExcelPackage(file.InputStream))
-                        {
-                            ExcelWorksheet excelWorksheet = excelPackage.Workbook.Worksheets.FirstOrDefault<ExcelWorksheet>();
-                            if (excelWorksheet != null)
-                            {
-                                int column = excelWorksheet.Dimension.End.Column;
-                                int row = excelWorksheet.Dimension.End.Row;
-                                if (column != 27)
-                                    return (ActionResult)this.RedirectToAction("AppUserUpload", (object)new
-                                    {
-                                        error = 1
-                                    });
-                                for (int Row = 2; Row <= row; ++Row)
-                                {
-                                    UserUploadClass userUploadClass = new UserUploadClass();
-                                    try
-                                    {
-                                        userUploadClass.EMPLOYEEID = excelWorksheet.Cells[Row, 1].Value.ToString();
-                                        userUploadClass.ROLE = excelWorksheet.Cells[Row, 2].Value.ToString();
-                                        userUploadClass.USERID = excelWorksheet.Cells[Row, 3].Value.ToString();
-                                        userUploadClass.PASSWORD = excelWorksheet.Cells[Row, 4].Value.ToString();
-                                        userUploadClass.FIRSTNAME = excelWorksheet.Cells[Row, 5].Value.ToString();
-                                        userUploadClass.LASTNAME = Convert.ToString(excelWorksheet.Cells[Row, 6].Value);
-                                        userUploadClass.AGE = excelWorksheet.Cells[Row, 7].Value.ToString();
-                                        userUploadClass.EMAIL = excelWorksheet.Cells[Row, 8].Value.ToString();
-                                        userUploadClass.MOBILE = excelWorksheet.Cells[Row, 9].Value.ToString();
-                                        userUploadClass.GENDER = excelWorksheet.Cells[Row, 10].Value.ToString();
-                                        userUploadClass.CITY = excelWorksheet.Cells[Row, 11].Value.ToString();
-                                        userUploadClass.OFFICE_ADDRESS = excelWorksheet.Cells[Row, 12].Value.ToString();
-                                        //
-                                        //string s1 = excelWorksheet.Cells[Row, 13].Value.ToString();
-                                        //string s2 = excelWorksheet.Cells[Row, 14].Value.ToString();
-                                        //DateTime dateTime1 = DateTime.FromOADate(double.Parse(s1));
-                                        //DateTime dateTime2 = DateTime.FromOADate(double.Parse(s2));
-                                        //userUploadClass.DATE_OF_BIRTH = dateTime1.ToString("dd-MM-yyyy");
-                                        //userUploadClass.DATE_OF_JOINING = dateTime2.ToString("dd-MM-yyyy");
+       public ActionResult UserUploadDisplay()
+ {
+     List<UserUploadClass> userUploadClassList = new List<UserUploadClass>();
+     List<UserUploadClass> source = new List<UserUploadClass>();
+     UserSession content = (UserSession)this.HttpContext.Session.Contents["UserSession"];
+     int orgid = Convert.ToInt32(content.id_ORGANIZATION);
+     string upKey = "UP_" + content.id_ORGANIZATION + "_" + content.ID_USER;
+     if (this.Request != null)
+     {
+         HttpPostedFileBase file = this.Request.Files["uploadBtn"];
+         if (file != null)
+         {
+             if (file.ContentLength >= 0 || !string.IsNullOrEmpty(file.FileName))
+             {
+                 string fileName = file.FileName;
+                 string contentType = file.ContentType;
+                 byte[] buffer = new byte[file.ContentLength];
+                 file.InputStream.Read(buffer, 0, Convert.ToInt32(file.ContentLength));
+                 using (ExcelPackage excelPackage = new ExcelPackage(file.InputStream))
+                 {
+                     ExcelWorksheet excelWorksheet = excelPackage.Workbook.Worksheets.FirstOrDefault<ExcelWorksheet>();
+                     if (excelWorksheet != null)
+                     {
+                         int column = excelWorksheet.Dimension.End.Column;
+                         int row = excelWorksheet.Dimension.End.Row;
+                         if (column != 27)
+                             return (ActionResult)this.RedirectToAction("AppUserUpload", (object)new
+                             {
+                                 error = 1
+                             });
+                         for (int Row = 2; Row <= row; ++Row)
+                         {
+                             UserUploadClass userUploadClass = new UserUploadClass();
+                             try
+                             {
+                                 if (excelWorksheet.Cells[Row, 1].Value == null &&
+     excelWorksheet.Cells[Row, 2].Value == null &&
+     excelWorksheet.Cells[Row, 3].Value == null)
+                                 {
+                                     continue; // Skip this row
+                                 }
 
-                                        //
-                                        object s1 = excelWorksheet.Cells[Row, 13].Value;
-                                        object s2 = excelWorksheet.Cells[Row, 14].Value;
+                                 userUploadClass.EMPLOYEEID = excelWorksheet.Cells[Row, 1].Value?.ToString() ?? "";
+                                 userUploadClass.ROLE = excelWorksheet.Cells[Row, 2].Value?.ToString() ?? "";
+                                 userUploadClass.USERID = excelWorksheet.Cells[Row, 3].Value?.ToString() ?? "";
+                                 userUploadClass.PASSWORD = excelWorksheet.Cells[Row, 4].Value?.ToString() ?? "";
+                                 userUploadClass.FIRSTNAME = excelWorksheet.Cells[Row, 5].Value?.ToString() ?? "";
+                                 userUploadClass.LASTNAME = Convert.ToString(excelWorksheet.Cells[Row, 6].Value) ?? "";
+                                 userUploadClass.AGE = excelWorksheet.Cells[Row, 7].Value?.ToString() ?? "";
+                                 userUploadClass.EMAIL = excelWorksheet.Cells[Row, 8].Value?.ToString() ?? "";
+                                 userUploadClass.MOBILE = excelWorksheet.Cells[Row, 9].Value.ToString() ?? "";
+                                 userUploadClass.GENDER = excelWorksheet.Cells[Row, 10].Value.ToString() ?? "";
+                                 userUploadClass.CITY = excelWorksheet.Cells[Row, 11].Value.ToString() ?? "";
+                                 userUploadClass.OFFICE_ADDRESS = excelWorksheet.Cells[Row, 12].Value.ToString() ?? "";
+                                 //
+                                 //string s1 = excelWorksheet.Cells[Row, 13].Value.ToString();
+                                 //string s2 = excelWorksheet.Cells[Row, 14].Value.ToString();
+                                 //DateTime dateTime1 = DateTime.FromOADate(double.Parse(s1));
+                                 //DateTime dateTime2 = DateTime.FromOADate(double.Parse(s2));
+                                 //userUploadClass.DATE_OF_BIRTH = dateTime1.ToString("dd-MM-yyyy");
+                                 //userUploadClass.DATE_OF_JOINING = dateTime2.ToString("dd-MM-yyyy");
 
-                                        DateTime dateTime1 = DateTime.MinValue; // Initialize to a default value
-                                        DateTime dateTime2 = DateTime.MinValue; // Initialize to a default value
+                                 //
+                                 object s1 = excelWorksheet.Cells[Row, 13].Value;
+                                 object s2 = excelWorksheet.Cells[Row, 14].Value;
 
-                                        // Process s1
-                                        if (s1 is string dateString)
-                                        {
-                                            dateTime1 = DateTime.ParseExact(dateString, "dd/MM/yyyy", null); // Adjust format if needed
-                                        }
-                                        else if (s1 is DateTime dateTime)
-                                        {
-                                            dateTime1 = dateTime;
-                                        }
-                                        else if (s1 is double serialNumber)
-                                        {
-                                            dateTime1 = DateTime.FromOADate(serialNumber); // Convert serial number to DateTime
-                                        }
+                                 DateTime dateTime1 = DateTime.MinValue; // Initialize to a default value
+                                 DateTime dateTime2 = DateTime.MinValue; // Initialize to a default value
 
-                                        // Process s2
-                                        if (s2 is double serialNumber2) // Check if it's a number (Excel date serial number)
-                                        {
-                                            dateTime2 = DateTime.FromOADate(serialNumber2);
-                                        }
-                                        else if (s2 is DateTime dateTime2Object) // Check if it's already a DateTime
-                                        {
-                                            dateTime2 = dateTime2Object;
-                                        }
+                                 // Process s1
+                                 if (s1 is string dateString)
+                                 {
+                                     dateTime1 = DateTime.ParseExact(dateString, "dd/MM/yyyy", null); // Adjust format if needed
+                                 }
+                                 else if (s1 is DateTime dateTime)
+                                 {
+                                     dateTime1 = dateTime;
+                                 }
+                                 else if (s1 is double serialNumber)
+                                 {
+                                     dateTime1 = DateTime.FromOADate(serialNumber); // Convert serial number to DateTime
+                                 }
 
-                                        // If you need to convert the DateTime back to the number format for Excel
-                                        double number1 = dateTime1.ToOADate();
-                                        double number2 = dateTime2.ToOADate();
+                                 // Process s2
+                                 if (s2 is double serialNumber2) // Check if it's a number (Excel date serial number)
+                                 {
+                                     dateTime2 = DateTime.FromOADate(serialNumber2);
+                                 }
+                                 else if (s2 is DateTime dateTime2Object) // Check if it's already a DateTime
+                                 {
+                                     dateTime2 = dateTime2Object;
+                                 }
 
-                                        // Assign the formatted date as strings
-                                        userUploadClass.DATE_OF_BIRTH = dateTime1.ToString("dd-MM-yyyy");
-                                        userUploadClass.DATE_OF_JOINING = dateTime2.ToString("dd-MM-yyyy");
+                                 // If you need to convert the DateTime back to the number format for Excel
+                                 double number1 = dateTime1.ToOADate();
+                                 double number2 = dateTime2.ToOADate();
 
-                                       
+                                 // Assign the formatted date as strings
+                                 userUploadClass.DATE_OF_BIRTH = dateTime1.ToString("dd-MM-yyyy");
+                                 userUploadClass.DATE_OF_JOINING = dateTime2.ToString("dd-MM-yyyy");
 
-                                        //
-                                        userUploadClass.user_department = excelWorksheet.Cells[Row, 15].Value.ToString();
-                                        userUploadClass.user_designation = excelWorksheet.Cells[Row, 16].Value.ToString();
-                                        userUploadClass.user_function = excelWorksheet.Cells[Row, 17].Value.ToString();
-                                        userUploadClass.user_grade = excelWorksheet.Cells[Row, 18].Value.ToString();
-                                        userUploadClass.user_status = excelWorksheet.Cells[Row, 19].Value.ToString();
-                                        userUploadClass.reporting_manager = excelWorksheet.Cells[Row, 21].Value.ToString();
-                                        userUploadClass.Location = excelWorksheet.Cells[Row, 22].Value.ToString();
-
-                                        userUploadClass.L4 = excelWorksheet.Cells[Row, 23].Value.ToString();
-                                        userUploadClass.L3 = excelWorksheet.Cells[Row, 24].Value.ToString();
-                                        userUploadClass.L2 = excelWorksheet.Cells[Row, 25].Value.ToString();
-                                        userUploadClass.L1 = excelWorksheet.Cells[Row, 26].Value.ToString();
-                                        userUploadClass.Spectator = excelWorksheet.Cells[Row, 27].Value.ToString();
-
-                                        userUploadClassList.Add(userUploadClass);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        userUploadClassList.Add(userUploadClass);
-                                    }
-                                }
-                            }
-                        }
-                        foreach (UserUploadClass userUploadClass1 in userUploadClassList)
-                        {
-                            UserUploadClass item = userUploadClass1;
-                            UserUploadClass userUploadClass2 = new UserUploadClass();
-                            tbl_user tblUser1 = this.db.tbl_user.Where<tbl_user>((Expression<Func<tbl_user, bool>>)(t => t.EMPLOYEEID == item.EMPLOYEEID && t.ID_ORGANIZATION == (int?)orgid && t.USERID.ToLower() == item.USERID.ToLower())).FirstOrDefault<tbl_user>();
-                            userUploadClass2.EMPLOYEEID = item.EMPLOYEEID.Trim();
-                            userUploadClass2.ROLE = item.ROLE;
-                            string rStr = item.ROLE;
-                            tbl_csst_role tblCsstRole = this.db.tbl_csst_role.Where<tbl_csst_role>((Expression<Func<tbl_csst_role, bool>>)(t => t.csst_role.ToUpper() == rStr.ToUpper() && t.id_organization == (int?)orgid)).FirstOrDefault<tbl_csst_role>();
-                            userUploadClass2.STATUS = "A";
-                            if (tblCsstRole == null)
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.id_role = 0;
-                                userUploadClass2.Message = "Role Not Found";
-                            }
-                            else
-                            userUploadClass2.id_role = tblCsstRole.id_csst_role;
-                            userUploadClass2.USERID = item.USERID;
-                            userUploadClass2.PASSWORD = item.PASSWORD;
-                            if (item.FIRSTNAME != null)
-                            {
-                                userUploadClass2.FIRSTNAME = item.FIRSTNAME.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.LASTNAME != null)
-                            {
-                                userUploadClass2.LASTNAME = item.LASTNAME.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            userUploadClass2.AGE = item.AGE;
-                            if (item.EMAIL != null)
-                            {
-                                userUploadClass2.EMAIL = item.EMAIL.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            userUploadClass2.AGE = item.AGE;
-                            if (item.MOBILE != null)
-                            {
-                                userUploadClass2.MOBILE = item.MOBILE.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.GENDER != null)
-                            {
-                                userUploadClass2.GENDER = item.GENDER.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.CITY != null)
-                            {
-                                userUploadClass2.CITY = item.CITY.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.OFFICE_ADDRESS != null)
-                            {
-                                userUploadClass2.OFFICE_ADDRESS = item.OFFICE_ADDRESS.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.DATE_OF_BIRTH != null)
-                            {
-                                userUploadClass2.DATE_OF_BIRTH = item.DATE_OF_BIRTH.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.DATE_OF_JOINING != null)
-                            {
-                                userUploadClass2.DATE_OF_JOINING = item.DATE_OF_JOINING.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.user_department != null)
-                            {
-                                userUploadClass2.user_department = item.user_department.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.user_designation != null)
-                            {
-                                userUploadClass2.user_designation = item.user_designation.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.user_function != null)
-                            {
-                                userUploadClass2.user_function = item.user_function.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.user_grade != null)
-                            {
-                                userUploadClass2.user_grade = item.user_grade.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.user_status != null)
-                            {
-                                userUploadClass2.user_status = item.user_status.Trim();
-                            }
-                            else
-                            {
-                                userUploadClass2.STATUS = "R";
-                                userUploadClass2.Message = "|Some data Not Found";
-                            }
-                            if (item.reporting_manager != null)
-                            {
-                                if (!(item.reporting_manager == "NA"))
-                                {
-                                    tbl_user tblUser2 = this.db.tbl_user.Where<tbl_user>((Expression<Func<tbl_user, bool>>)(t => t.EMPLOYEEID == item.reporting_manager && t.ID_ORGANIZATION == (int?)orgid)).FirstOrDefault<tbl_user>();
-                                    if (tblUser2 == null)
-                                    {
-                                        userUploadClass2.STATUS = "R";
-                                        userUploadClass2.id_reporting_manager = 0;
-                                        userUploadClass2.Message += "|Reporting Manager Not Found";
-                                    }
-                                    else
-                                        userUploadClass2.id_reporting_manager = tblUser2.ID_USER;
-                                }
-                                userUploadClass2.reporting_manager = item.reporting_manager.Trim();
-                            }
                                
-                           
-                            if (tblUser1 != null)
-                            {
-                                userUploadClass2.Message += "|User already Present.";
-                                userUploadClass2.STATUS = "R";
-                            }
-                            if (userUploadClass2.DATE_OF_BIRTH == null)
-                            {
-                                userUploadClass2.Message += "|Date of Birth is not in correct format";
-                                userUploadClass2.STATUS = "R";
-                            }
-                            if (userUploadClass2.DATE_OF_JOINING == null)
-                            {
-                                userUploadClass2.Message += "|Date of joining is not in correct format";
-                                userUploadClass2.STATUS = "R";
-                            }
-                            if (userUploadClass2.USERID == null)
-                            {
-                                userUploadClass2.Message += "|USERID is null";
-                                userUploadClass2.STATUS = "R";
-                            }
-                            if (userUploadClass2.PASSWORD == null)
-                            {
-                                userUploadClass2.Message += "|USERID is null";
-                                userUploadClass2.STATUS = "R";
-                            }
-                           
-                          
-                                userUploadClass2.Location = item.Location.Trim();
-                           
-                        
-                          
-                           
-                                userUploadClass2.L4 = item.L4.Trim();
-                           
-                     
-                                userUploadClass2.L3 = item.L3.Trim();
-                          
-                                userUploadClass2.L2 = item.L2.Trim();
-                           
-                                userUploadClass2.L1 = item.L1.Trim();
-                           
-                                userUploadClass2.Spectator = item.Spectator.Trim();
-                           
-                            source.Add(userUploadClass2);
-                        }
-                        DbSet<tbl_temp_user_upload> tblTempUserUpload = this.db.tbl_temp_user_upload;
-                        Expression<Func<tbl_temp_user_upload, bool>> predicate = (Expression<Func<tbl_temp_user_upload, bool>>)(t => t.temp_user_upload_key == upKey);
-                        foreach (tbl_temp_user_upload entity in tblTempUserUpload.Where<tbl_temp_user_upload>(predicate).ToList<tbl_temp_user_upload>())
-                        {
-                            this.db.tbl_temp_user_upload.Remove(entity);
-                            this.db.SaveChanges();
-                        }
-                        foreach (UserUploadClass userUploadClass in source)
-                        {
-                            string connectionString = ConfigurationManager.ConnectionStrings["dbconnectionstring"].ConnectionString; // Replace with your MySQL connection string
 
-                            string query = @"
-                                            INSERT INTO tbl_temp_user_upload (
-                                                EMPLOYEEID, ROLE, status, USERID, PASSWORD, FIRSTNAME, LASTNAME,
-                                                AGE, EMAIL, MOBILE, GENDER, CITY, OFFICE_ADDRESS, DATE_OF_BIRTH,
-                                                DATE_OF_JOINING, user_department, user_designation, user_function,
-                                                user_grade, user_status, reporting_manager, id_reporting_manager,
-                                                ID_ROLE, temp_user_upload_key,Location,L4,L3,L2,L1,Spectator
-                                            ) VALUES (
-                                                @EMPLOYEEID, @ROLE, @status, @USERID, @PASSWORD, @FIRSTNAME, @LASTNAME,
-                                                @AGE, @EMAIL, @MOBILE, @GENDER, @CITY, @OFFICE_ADDRESS, @DATE_OF_BIRTH,
-                                                @DATE_OF_JOINING, @user_department, @user_designation, @user_function,
-                                                @user_grade, @user_status, @reporting_manager, @id_reporting_manager,
-                                                @ID_ROLE, @temp_user_upload_key,@Location,@L4,@L3,@L2,@L1,@Spectator
-                                            )";
+                                 //
+                                 userUploadClass.user_department = excelWorksheet.Cells[Row, 15].Value.ToString() ?? "";
+                                 userUploadClass.user_designation = excelWorksheet.Cells[Row, 16].Value.ToString() ?? "";
+                                 userUploadClass.user_function = excelWorksheet.Cells[Row, 17].Value.ToString() ?? "";
+                                 userUploadClass.user_grade = excelWorksheet.Cells[Row, 18].Value.ToString() ?? "";
+                                 userUploadClass.user_status = excelWorksheet.Cells[Row, 19].Value.ToString() ?? "";
+                                 userUploadClass.reporting_manager = excelWorksheet.Cells[Row, 21].Value.ToString() ?? "";
+                                 userUploadClass.Location = excelWorksheet.Cells[Row, 22].Value.ToString() ?? "";
 
-                            using (MySqlConnection conn = new MySqlConnection(connectionString))
-                            {
-                                MySqlCommand cmd = new MySqlCommand(query, conn);
+                                 userUploadClass.L4 = excelWorksheet.Cells[Row, 23].Value.ToString() ?? "";
+                                 userUploadClass.L3 = excelWorksheet.Cells[Row, 24].Value.ToString() ?? "";
+                                 userUploadClass.L2 = excelWorksheet.Cells[Row, 25].Value.ToString() ?? "";
+                                 userUploadClass.L1 = excelWorksheet.Cells[Row, 26].Value.ToString() ?? "";
+                                 userUploadClass.Spectator = excelWorksheet.Cells[Row, 27].Value.ToString() ?? "";
 
-                                // Add parameters
-                                cmd.Parameters.AddWithValue("@EMPLOYEEID", userUploadClass.EMPLOYEEID);
-                                cmd.Parameters.AddWithValue("@ROLE", userUploadClass.ROLE);
-                                cmd.Parameters.AddWithValue("@status", userUploadClass.STATUS);
-                                cmd.Parameters.AddWithValue("@USERID", userUploadClass.USERID);
-                                cmd.Parameters.AddWithValue("@PASSWORD", userUploadClass.PASSWORD);
-                                cmd.Parameters.AddWithValue("@FIRSTNAME", userUploadClass.FIRSTNAME);
-                                cmd.Parameters.AddWithValue("@LASTNAME", userUploadClass.LASTNAME);
-                                cmd.Parameters.AddWithValue("@AGE", userUploadClass.AGE);
-                                cmd.Parameters.AddWithValue("@EMAIL", userUploadClass.EMAIL);
-                                cmd.Parameters.AddWithValue("@MOBILE", userUploadClass.MOBILE);
-                                cmd.Parameters.AddWithValue("@GENDER", userUploadClass.GENDER);
-                                cmd.Parameters.AddWithValue("@CITY", userUploadClass.CITY);
-                                cmd.Parameters.AddWithValue("@OFFICE_ADDRESS", userUploadClass.OFFICE_ADDRESS);
-                                cmd.Parameters.AddWithValue("@DATE_OF_BIRTH", userUploadClass.DATE_OF_BIRTH);
-                                cmd.Parameters.AddWithValue("@DATE_OF_JOINING", userUploadClass.DATE_OF_JOINING);
-                                cmd.Parameters.AddWithValue("@user_department", userUploadClass.user_department);
-                                cmd.Parameters.AddWithValue("@user_designation", userUploadClass.user_designation);
-                                cmd.Parameters.AddWithValue("@user_function", userUploadClass.user_function);
-                                cmd.Parameters.AddWithValue("@user_grade", userUploadClass.user_grade);
-                                cmd.Parameters.AddWithValue("@user_status", userUploadClass.user_status);
-                                cmd.Parameters.AddWithValue("@reporting_manager", userUploadClass.reporting_manager);
-                                cmd.Parameters.AddWithValue("@id_reporting_manager", userUploadClass.id_reporting_manager);
-                                cmd.Parameters.AddWithValue("@ID_ROLE", userUploadClass.id_role);
-                                cmd.Parameters.AddWithValue("@temp_user_upload_key", upKey);
-                                cmd.Parameters.AddWithValue("@Location", userUploadClass.Location);
-                                cmd.Parameters.AddWithValue("@L4", userUploadClass.L4);
-                                cmd.Parameters.AddWithValue("@L3", userUploadClass.L3);
-                                cmd.Parameters.AddWithValue("@L2", userUploadClass.L2);
-                                cmd.Parameters.AddWithValue("@L1", userUploadClass.L1);
-                                cmd.Parameters.AddWithValue("@Spectator", userUploadClass.Spectator);
+                                 userUploadClassList.Add(userUploadClass);
+                             }
+                             catch (Exception ex)
+                             {
+                                 userUploadClassList.Add(userUploadClass);
+                             }
+                         }
+                     }
+                 }
+                 foreach (UserUploadClass userUploadClass1 in userUploadClassList)
+                 {
+                     UserUploadClass item = userUploadClass1;
+                     UserUploadClass userUploadClass2 = new UserUploadClass();
+                     tbl_user tblUser1 = this.db.tbl_user.Where<tbl_user>((Expression<Func<tbl_user, bool>>)(t => t.EMPLOYEEID == item.EMPLOYEEID && t.ID_ORGANIZATION == (int?)orgid && t.USERID.ToLower() == item.USERID.ToLower())).FirstOrDefault<tbl_user>();
+                     userUploadClass2.EMPLOYEEID = item.EMPLOYEEID.Trim();
+                     userUploadClass2.ROLE = item.ROLE;
+                     string rStr = item.ROLE;
+                     tbl_csst_role tblCsstRole = this.db.tbl_csst_role.Where<tbl_csst_role>((Expression<Func<tbl_csst_role, bool>>)(t => t.csst_role.ToUpper() == rStr.ToUpper() && t.id_organization == (int?)orgid)).FirstOrDefault<tbl_csst_role>();
+                     userUploadClass2.STATUS = "A";
+                     if (tblCsstRole == null)
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.id_role = 0;
+                         userUploadClass2.Message = "Role Not Found";
+                     }
+                     else
+                     userUploadClass2.id_role = tblCsstRole.id_csst_role;
+                     userUploadClass2.USERID = item.USERID;
+                     userUploadClass2.PASSWORD = item.PASSWORD;
+                     if (item.FIRSTNAME != null)
+                     {
+                         userUploadClass2.FIRSTNAME = item.FIRSTNAME.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.LASTNAME != null)
+                     {
+                         userUploadClass2.LASTNAME = item.LASTNAME.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     userUploadClass2.AGE = item.AGE;
+                     if (item.EMAIL != null)
+                     {
+                         userUploadClass2.EMAIL = item.EMAIL.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     userUploadClass2.AGE = item.AGE;
+                     if (item.MOBILE != null)
+                     {
+                         userUploadClass2.MOBILE = item.MOBILE.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.GENDER != null)
+                     {
+                         userUploadClass2.GENDER = item.GENDER.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.CITY != null)
+                     {
+                         userUploadClass2.CITY = item.CITY.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.OFFICE_ADDRESS != null)
+                     {
+                         userUploadClass2.OFFICE_ADDRESS = item.OFFICE_ADDRESS.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.DATE_OF_BIRTH != null)
+                     {
+                         userUploadClass2.DATE_OF_BIRTH = item.DATE_OF_BIRTH.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.DATE_OF_JOINING != null)
+                     {
+                         userUploadClass2.DATE_OF_JOINING = item.DATE_OF_JOINING.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.user_department != null)
+                     {
+                         userUploadClass2.user_department = item.user_department.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.user_designation != null)
+                     {
+                         userUploadClass2.user_designation = item.user_designation.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.user_function != null)
+                     {
+                         userUploadClass2.user_function = item.user_function.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.user_grade != null)
+                     {
+                         userUploadClass2.user_grade = item.user_grade.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.user_status != null)
+                     {
+                         userUploadClass2.user_status = item.user_status.Trim();
+                     }
+                     else
+                     {
+                         userUploadClass2.STATUS = "R";
+                         userUploadClass2.Message = "|Some data Not Found";
+                     }
+                     if (item.reporting_manager != null)
+                     {
+                         if (!(item.reporting_manager == "NA"))
+                         {
+                             tbl_user tblUser2 = this.db.tbl_user.Where<tbl_user>((Expression<Func<tbl_user, bool>>)(t => t.EMPLOYEEID == item.reporting_manager && t.ID_ORGANIZATION == (int?)orgid)).FirstOrDefault<tbl_user>();
+                             if (tblUser2 == null)
+                             {
+                                 userUploadClass2.STATUS = "R";
+                                 userUploadClass2.id_reporting_manager = 0;
+                                 userUploadClass2.Message += "|Reporting Manager Not Found";
+                             }
+                             else
+                                 userUploadClass2.id_reporting_manager = tblUser2.ID_USER;
+                         }
+                         userUploadClass2.reporting_manager = item.reporting_manager.Trim();
+                     }
+                       
+                   
+                     if (tblUser1 != null)
+                     {
+                         userUploadClass2.Message += "|User already Present.";
+                         userUploadClass2.STATUS = "R";
+                     }
+                     if (userUploadClass2.DATE_OF_BIRTH == null)
+                     {
+                         userUploadClass2.Message += "|Date of Birth is not in correct format";
+                         userUploadClass2.STATUS = "R";
+                     }
+                     if (userUploadClass2.DATE_OF_JOINING == null)
+                     {
+                         userUploadClass2.Message += "|Date of joining is not in correct format";
+                         userUploadClass2.STATUS = "R";
+                     }
+                     if (userUploadClass2.USERID == null)
+                     {
+                         userUploadClass2.Message += "|USERID is null";
+                         userUploadClass2.STATUS = "R";
+                     }
+                     if (userUploadClass2.PASSWORD == null)
+                     {
+                         userUploadClass2.Message += "|USERID is null";
+                         userUploadClass2.STATUS = "R";
+                     }
+                   
+                   
+                         userUploadClass2.Location = item.Location.Trim();
+                   
+                 
+                   
+                   
+                         userUploadClass2.L4 = item.L4.Trim();
+                   
+             
+                         userUploadClass2.L3 = item.L3.Trim();
+                   
+                         userUploadClass2.L2 = item.L2.Trim();
+                   
+                         userUploadClass2.L1 = item.L1.Trim();
+                   
+                         userUploadClass2.Spectator = item.Spectator.Trim();
+                   
+                     source.Add(userUploadClass2);
+                 }
+                 DbSet<tbl_temp_user_upload> tblTempUserUpload = this.db.tbl_temp_user_upload;
+                 Expression<Func<tbl_temp_user_upload, bool>> predicate = (Expression<Func<tbl_temp_user_upload, bool>>)(t => t.temp_user_upload_key == upKey);
+                 foreach (tbl_temp_user_upload entity in tblTempUserUpload.Where<tbl_temp_user_upload>(predicate).ToList<tbl_temp_user_upload>())
+                 {
+                     this.db.tbl_temp_user_upload.Remove(entity);
+                     this.db.SaveChanges();
+                 }
+                 foreach (UserUploadClass userUploadClass in source)
+                 {
+                     string connectionString = ConfigurationManager.ConnectionStrings["dbconnectionstring"].ConnectionString; // Replace with your MySQL connection string
 
-                                try
-                                {
-                                    conn.Open();
-                                    cmd.ExecuteNonQuery();
-                                }
-                                catch (Exception ex)
-                                {
-                                    // Handle exception
-                                    Console.WriteLine("An error occurred: " + ex.Message);
-                                }
-                            }
+                     string query = @"
+                                     INSERT INTO tbl_temp_user_upload (
+                                         EMPLOYEEID, ROLE, status, USERID, PASSWORD, FIRSTNAME, LASTNAME,
+                                         AGE, EMAIL, MOBILE, GENDER, CITY, OFFICE_ADDRESS, DATE_OF_BIRTH,
+                                         DATE_OF_JOINING, user_department, user_designation, user_function,
+                                         user_grade, user_status, reporting_manager, id_reporting_manager,
+                                         ID_ROLE, temp_user_upload_key,Location,L4,L3,L2,L1,Spectator
+                                     ) VALUES (
+                                         @EMPLOYEEID, @ROLE, @status, @USERID, @PASSWORD, @FIRSTNAME, @LASTNAME,
+                                         @AGE, @EMAIL, @MOBILE, @GENDER, @CITY, @OFFICE_ADDRESS, @DATE_OF_BIRTH,
+                                         @DATE_OF_JOINING, @user_department, @user_designation, @user_function,
+                                         @user_grade, @user_status, @reporting_manager, @id_reporting_manager,
+                                         @ID_ROLE, @temp_user_upload_key,@Location,@L4,@L3,@L2,@L1,@Spectator
+                                     )";
 
-                                //this.db.tbl_temp_user_upload.Add(new tbl_temp_user_upload()
-                                //{
-                                //    EMPLOYEEID = userUploadClass.EMPLOYEEID,
-                                //    ROLE = userUploadClass.ROLE,
-                                //    status = userUploadClass.STATUS,
-                                //    USERID = userUploadClass.USERID,
-                                //    PASSWORD = userUploadClass.PASSWORD,
-                                //    FIRSTNAME = userUploadClass.FIRSTNAME,
-                                //    LASTNAME = userUploadClass.LASTNAME,
-                                //    AGE = userUploadClass.AGE,
-                                //    EMAIL = userUploadClass.EMAIL,
-                                //    MOBILE = userUploadClass.MOBILE,
-                                //    GENDER = userUploadClass.GENDER,
-                                //    CITY = userUploadClass.CITY,
-                                //    OFFICE_ADDRESS = userUploadClass.OFFICE_ADDRESS,
-                                //    DATE_OF_BIRTH = userUploadClass.DATE_OF_BIRTH,
-                                //    DATE_OF_JOINING = userUploadClass.DATE_OF_JOINING,
-                                //    user_department = userUploadClass.user_department,
-                                //    user_designation = userUploadClass.user_designation,
-                                //    user_function = userUploadClass.user_function,
-                                //    user_grade = userUploadClass.user_grade,
-                                //    user_status = userUploadClass.user_status,
-                                //    reporting_manager = userUploadClass.reporting_manager,
-                                //    id_reporting_manager = new int?(userUploadClass.id_reporting_manager),
-                                //    ID_ROLE = new int?(userUploadClass.id_role),
-                                //    temp_user_upload_key = upKey
-                                //});
-                                //this.db.SaveChanges();
-                        }
-                    }
-                }
-                else
-                {
-                    DbSet<tbl_temp_user_upload> tblTempUserUpload1 = this.db.tbl_temp_user_upload;
-                    Expression<Func<tbl_temp_user_upload, bool>> predicate = (Expression<Func<tbl_temp_user_upload, bool>>)(t => t.temp_user_upload_key == upKey);
-                    foreach (tbl_temp_user_upload tblTempUserUpload2 in tblTempUserUpload1.Where<tbl_temp_user_upload>(predicate).ToList<tbl_temp_user_upload>())
-                    source.Add(new UserUploadClass()
-                        {
-                            EMPLOYEEID = tblTempUserUpload2.EMPLOYEEID,
-                            ROLE = tblTempUserUpload2.ROLE,
-                            STATUS = tblTempUserUpload2.status,
-                            USERID = tblTempUserUpload2.USERID,
-                            PASSWORD = tblTempUserUpload2.PASSWORD,
-                            FIRSTNAME = tblTempUserUpload2.FIRSTNAME,
-                            LASTNAME = tblTempUserUpload2.LASTNAME,
-                            AGE = tblTempUserUpload2.AGE,
-                            EMAIL = tblTempUserUpload2.EMAIL,
-                            MOBILE = tblTempUserUpload2.MOBILE,
-                            GENDER = tblTempUserUpload2.GENDER,
-                            CITY = tblTempUserUpload2.CITY,
-                            OFFICE_ADDRESS = tblTempUserUpload2.OFFICE_ADDRESS,
-                            DATE_OF_BIRTH = tblTempUserUpload2.DATE_OF_BIRTH,
-                            DATE_OF_JOINING = tblTempUserUpload2.DATE_OF_JOINING,
-                            user_department = tblTempUserUpload2.user_department,
-                            user_designation = tblTempUserUpload2.user_designation,
-                            user_function = tblTempUserUpload2.user_function,
-                            user_grade = tblTempUserUpload2.user_grade,
-                            user_status = tblTempUserUpload2.user_status,
-                            reporting_manager = tblTempUserUpload2.reporting_manager,
-                         
-                        });
-                }
-            }
-            List<UserUploadClass> list1 = source.Where<UserUploadClass>((Func<UserUploadClass, bool>)(t => t.STATUS == "A")).ToList<UserUploadClass>();
-            List<UserUploadClass> list2 = source.Where<UserUploadClass>((Func<UserUploadClass, bool>)(t => t.STATUS != "A")).ToList<UserUploadClass>();
-            this.ViewData["acceptList"] = (object)list1;
-            this.ViewData["rejectList"] = (object)list2;
-            return (ActionResult)this.View();
-        }
+                     using (MySqlConnection conn = new MySqlConnection(connectionString))
+                     {
+                         MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                         // Add parameters
+                         cmd.Parameters.AddWithValue("@EMPLOYEEID", userUploadClass.EMPLOYEEID);
+                         cmd.Parameters.AddWithValue("@ROLE", userUploadClass.ROLE);
+                         cmd.Parameters.AddWithValue("@status", userUploadClass.STATUS);
+                         cmd.Parameters.AddWithValue("@USERID", userUploadClass.USERID);
+                         cmd.Parameters.AddWithValue("@PASSWORD", userUploadClass.PASSWORD);
+                         cmd.Parameters.AddWithValue("@FIRSTNAME", userUploadClass.FIRSTNAME);
+                         cmd.Parameters.AddWithValue("@LASTNAME", userUploadClass.LASTNAME);
+                         cmd.Parameters.AddWithValue("@AGE", userUploadClass.AGE);
+                         cmd.Parameters.AddWithValue("@EMAIL", userUploadClass.EMAIL);
+                         cmd.Parameters.AddWithValue("@MOBILE", userUploadClass.MOBILE);
+                         cmd.Parameters.AddWithValue("@GENDER", userUploadClass.GENDER);
+                         cmd.Parameters.AddWithValue("@CITY", userUploadClass.CITY);
+                         cmd.Parameters.AddWithValue("@OFFICE_ADDRESS", userUploadClass.OFFICE_ADDRESS);
+                         cmd.Parameters.AddWithValue("@DATE_OF_BIRTH", userUploadClass.DATE_OF_BIRTH);
+                         cmd.Parameters.AddWithValue("@DATE_OF_JOINING", userUploadClass.DATE_OF_JOINING);
+                         cmd.Parameters.AddWithValue("@user_department", userUploadClass.user_department);
+                         cmd.Parameters.AddWithValue("@user_designation", userUploadClass.user_designation);
+                         cmd.Parameters.AddWithValue("@user_function", userUploadClass.user_function);
+                         cmd.Parameters.AddWithValue("@user_grade", userUploadClass.user_grade);
+                         cmd.Parameters.AddWithValue("@user_status", userUploadClass.user_status);
+                         cmd.Parameters.AddWithValue("@reporting_manager", userUploadClass.reporting_manager);
+                         cmd.Parameters.AddWithValue("@id_reporting_manager", userUploadClass.id_reporting_manager);
+                         cmd.Parameters.AddWithValue("@ID_ROLE", userUploadClass.id_role);
+                         cmd.Parameters.AddWithValue("@temp_user_upload_key", upKey);
+                         cmd.Parameters.AddWithValue("@Location", userUploadClass.Location);
+                         cmd.Parameters.AddWithValue("@L4", userUploadClass.L4);
+                         cmd.Parameters.AddWithValue("@L3", userUploadClass.L3);
+                         cmd.Parameters.AddWithValue("@L2", userUploadClass.L2);
+                         cmd.Parameters.AddWithValue("@L1", userUploadClass.L1);
+                         cmd.Parameters.AddWithValue("@Spectator", userUploadClass.Spectator);
+
+                         try
+                         {
+                             conn.Open();
+                             cmd.ExecuteNonQuery();
+                         }
+                         catch (Exception ex)
+                         {
+                             // Handle exception
+                             Console.WriteLine("An error occurred: " + ex.Message);
+                         }
+                     }
+
+                         //this.db.tbl_temp_user_upload.Add(new tbl_temp_user_upload()
+                         //{
+                         //    EMPLOYEEID = userUploadClass.EMPLOYEEID,
+                         //    ROLE = userUploadClass.ROLE,
+                         //    status = userUploadClass.STATUS,
+                         //    USERID = userUploadClass.USERID,
+                         //    PASSWORD = userUploadClass.PASSWORD,
+                         //    FIRSTNAME = userUploadClass.FIRSTNAME,
+                         //    LASTNAME = userUploadClass.LASTNAME,
+                         //    AGE = userUploadClass.AGE,
+                         //    EMAIL = userUploadClass.EMAIL,
+                         //    MOBILE = userUploadClass.MOBILE,
+                         //    GENDER = userUploadClass.GENDER,
+                         //    CITY = userUploadClass.CITY,
+                         //    OFFICE_ADDRESS = userUploadClass.OFFICE_ADDRESS,
+                         //    DATE_OF_BIRTH = userUploadClass.DATE_OF_BIRTH,
+                         //    DATE_OF_JOINING = userUploadClass.DATE_OF_JOINING,
+                         //    user_department = userUploadClass.user_department,
+                         //    user_designation = userUploadClass.user_designation,
+                         //    user_function = userUploadClass.user_function,
+                         //    user_grade = userUploadClass.user_grade,
+                         //    user_status = userUploadClass.user_status,
+                         //    reporting_manager = userUploadClass.reporting_manager,
+                         //    id_reporting_manager = new int?(userUploadClass.id_reporting_manager),
+                         //    ID_ROLE = new int?(userUploadClass.id_role),
+                         //    temp_user_upload_key = upKey
+                         //});
+                         //this.db.SaveChanges();
+                 }
+             }
+         }
+         else
+         {
+             DbSet<tbl_temp_user_upload> tblTempUserUpload1 = this.db.tbl_temp_user_upload;
+             Expression<Func<tbl_temp_user_upload, bool>> predicate = (Expression<Func<tbl_temp_user_upload, bool>>)(t => t.temp_user_upload_key == upKey);
+             foreach (tbl_temp_user_upload tblTempUserUpload2 in tblTempUserUpload1.Where<tbl_temp_user_upload>(predicate).ToList<tbl_temp_user_upload>())
+             source.Add(new UserUploadClass()
+                 {
+                     EMPLOYEEID = tblTempUserUpload2.EMPLOYEEID,
+                     ROLE = tblTempUserUpload2.ROLE,
+                     STATUS = tblTempUserUpload2.status,
+                     USERID = tblTempUserUpload2.USERID,
+                     PASSWORD = tblTempUserUpload2.PASSWORD,
+                     FIRSTNAME = tblTempUserUpload2.FIRSTNAME,
+                     LASTNAME = tblTempUserUpload2.LASTNAME,
+                     AGE = tblTempUserUpload2.AGE,
+                     EMAIL = tblTempUserUpload2.EMAIL,
+                     MOBILE = tblTempUserUpload2.MOBILE,
+                     GENDER = tblTempUserUpload2.GENDER,
+                     CITY = tblTempUserUpload2.CITY,
+                     OFFICE_ADDRESS = tblTempUserUpload2.OFFICE_ADDRESS,
+                     DATE_OF_BIRTH = tblTempUserUpload2.DATE_OF_BIRTH,
+                     DATE_OF_JOINING = tblTempUserUpload2.DATE_OF_JOINING,
+                     user_department = tblTempUserUpload2.user_department,
+                     user_designation = tblTempUserUpload2.user_designation,
+                     user_function = tblTempUserUpload2.user_function,
+                     user_grade = tblTempUserUpload2.user_grade,
+                     user_status = tblTempUserUpload2.user_status,
+                     reporting_manager = tblTempUserUpload2.reporting_manager,
+                 
+                 });
+         }
+     }
+     List<UserUploadClass> list1 = source.Where<UserUploadClass>((Func<UserUploadClass, bool>)(t => t.STATUS == "A")).ToList<UserUploadClass>();
+     List<UserUploadClass> list2 = source.Where<UserUploadClass>((Func<UserUploadClass, bool>)(t => t.STATUS != "A")).ToList<UserUploadClass>();
+     this.ViewData["acceptList"] = (object)list1;
+     this.ViewData["rejectList"] = (object)list2;
+     return (ActionResult)this.View();
+ }
 
         public ActionResult UpdateUserData()
         {
